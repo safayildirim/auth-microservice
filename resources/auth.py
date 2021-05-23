@@ -1,4 +1,4 @@
-from app.main.models.user import User
+from models.user import User
 from flask_restful import Resource, Api
 from flask import request
 

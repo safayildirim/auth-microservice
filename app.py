@@ -1,8 +1,8 @@
 from flask.app import Flask
 from flask_bcrypt import Bcrypt
-from .models import create_db
-from .models.user import insert_data
-from .auth import init_resource
+from models import create_db
+from models.user import insert_data
+from resources.auth import init_resource
 
 app = Flask(__name__)
 app.app_context().push()
