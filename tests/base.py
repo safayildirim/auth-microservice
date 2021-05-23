@@ -1,7 +1,6 @@
+from app.main.db import get_db
 from flask import current_app
 from flask_testing import TestCase
-
-from app.main.db import get_db
 
 
 class BaseTestCase(TestCase):

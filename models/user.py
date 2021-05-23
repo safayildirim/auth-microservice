@@ -1,14 +1,14 @@
-import bcrypt
 import uuid
-
 from datetime import datetime
+
+import bcrypt
 
 from . import db
 
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.String(64), index= True)
+    user_id = db.Column(db.String(64), index=True)
     username = db.Column(db.String(32))
     email = db.Column(db.String(64), index=True, unique=True, nullable=False)
     password = db.Column(db.String(256))
@@ -17,7 +17,7 @@ class User(db.Model):
     create_time = db.Column(db.DateTime)
     last_modified_time = db.Column(db.DateTime)
 
-    def __init__(self, email, password, username=None,  firstname=None, lastname=None) -> None:
+    def __init__(self, email, password, username=None, firstname=None, lastname=None) -> None:
         super().__init__()
 
         uid = uuid.uuid4()
@@ -30,7 +30,10 @@ class User(db.Model):
         self.lastname = lastname
 
     def check_password(self, password):
-        return True
+        if self.password == self._hash_password(password):
+            return True
+        else:
+            return False
 
     def _hash_password(self, password: str):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
@@ -41,7 +44,6 @@ class User(db.Model):
 
         db.session.add(self)
         db.session.commit()
-
 
 # class Order(db.Model):
 #     id = db.Column(db.Integer, primary_key=True)

@@ -1,7 +1,8 @@
-from models.user import User
 from flask_restful import Resource, reqparse
 
-success = {"code":"0", "message": "OK"}
+from models.user import User
+
+success = {"code": "0", "message": "OK"}
 
 base_parser = reqparse.RequestParser()
 base_parser.add_argument('username', type=str)
@@ -24,5 +25,5 @@ class RegisterResource(Resource):
         user.save()
 
         response = {'user_id': user.user_id}
-        response.update(success) 
+        response.update(success)
         return response

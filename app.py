@@ -1,7 +1,8 @@
-from resources import init_resources
 from flask.app import Flask
 from flask_bcrypt import Bcrypt
+
 from models import create_db
+from resources import init_resources
 
 app = Flask(__name__)
 app.app_context().push()

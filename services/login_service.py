@@ -1,6 +1,7 @@
 from flask.wrappers import Response
-from services import make_response
+
 from models.user import User
+from services import make_response
 
 
 class WrongCredentialsError(RuntimeError):

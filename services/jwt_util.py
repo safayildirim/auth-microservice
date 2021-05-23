@@ -12,7 +12,7 @@ def encode_auth_token(user_id):
     """
     try:
         payload = {
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, seconds=5),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, minutes=5),
             'iat': datetime.datetime.utcnow(),
             'sub': user_id
         }
@@ -25,9 +25,9 @@ def encode_auth_token(user_id):
         return e
 
 
-def decode_auth_token(auth_token):
+def verify_token(auth_token):
     """
-    Decodes the auth token
+    Verify the auth token
     :param auth_token:
     :return: integer|string
     """
@@ -38,3 +38,4 @@ def decode_auth_token(auth_token):
         return 'Signature expired. Please log in again.'
     except jwt.InvalidTokenError:
         return 'Invalid token. Please log in again.'
+

@@ -1,9 +1,10 @@
 import unittest
 
-from base import BaseTestCase
 from app.main.db import get_db
 from app.main.jwt_util import encode_auth_token, decode_auth_token
 from app.main.models import User
+
+from base import BaseTestCase
 
 
 class TestAuthToken(BaseTestCase):
