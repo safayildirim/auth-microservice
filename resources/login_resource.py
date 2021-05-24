@@ -15,10 +15,10 @@ class LoginResource(Resource):
             user = User.query.filter_by(email=args.email).first()
             if user is None:
                 response = {
-                    'status': '401',
+                    'status': '404',
                     'message': 'User is not found.'
                 }
-                return response, 401
+                return response, 404
             if user.check_password(args.password):
                 auth_token = jwt_util.encode_auth_token(user.id)
                 if auth_token:

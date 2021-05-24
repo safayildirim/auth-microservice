@@ -19,17 +19,12 @@ class RegisterResource(Resource):
 
     def post(self):
         args = self.register_parser.parse_args()
-
+        user = User.query.filter_by(email=args.email).first()
+        if user is not None:
+            return {'status': '401', 'message': "User already exist."}, 401
         user = User(email=args['email'], password=args['password'],
                     username=args['username'], firstname=args['firstname'], lastname=args['lastname'])
-        try:
-            user.save()
-        except Exception as e:
-            return {
-                'status': '401',
-                'message': "User already exist."
-            }, 401
-
-        response = {'user_id': user.user_id}
+        user.save()
+        response = {"status": "200", 'user_id': user.user_id}
         response.update(success)
         return response
