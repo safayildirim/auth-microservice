@@ -1,5 +1,6 @@
 from flask_restful import Resource, reqparse
 
+from common import errors
 from models.user import User
 
 success = {"code": "0", "message": "OK"}
@@ -20,8 +21,8 @@ class RegisterResource(Resource):
     def post(self):
         args = self.register_parser.parse_args()
         user = User.query.filter_by(email=args.email).first()
-        if user is not None:
-            return {'status': '401', 'message': "User already exist."}, 401
+        if user:
+            return errors['UserAlreadyExistError']
         user = User(email=args['email'], password=args['password'],
                     username=args['username'], firstname=args['firstname'], lastname=args['lastname'])
         user.save()
