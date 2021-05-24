@@ -9,3 +9,4 @@ def init_resources(app):
 
     auth_api.add_resource(RegisterResource, '/register')
     auth_api.add_resource(LoginResource, '/login')
+    print('init_resources called')

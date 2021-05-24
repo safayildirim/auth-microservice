@@ -1,6 +1,7 @@
-from app.main.db import get_db
 from flask import current_app
 from flask_testing import TestCase
+
+from app import create_app
 
 
 class BaseTestCase(TestCase):
@@ -10,11 +11,9 @@ class BaseTestCase(TestCase):
         return current_app
 
     def setUp(self):
-        db = get_db()
-        db.create_all()
-        db.session.commit()
+        create_app()
+        self.app_context = self.app.app_context()
+        self.app_context.push()
 
     def tearDown(self):
-        db = get_db()
-        db.session.remove()
-        db.drop_all()
+        self.app_context.pop()

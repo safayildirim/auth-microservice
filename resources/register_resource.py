@@ -22,7 +22,13 @@ class RegisterResource(Resource):
 
         user = User(email=args['email'], password=args['password'],
                     username=args['username'], firstname=args['firstname'], lastname=args['lastname'])
-        user.save()
+        try:
+            user.save()
+        except Exception as e:
+            return {
+                'status': '401',
+                'message': "User already exist."
+            }, 401
 
         response = {'user_id': user.user_id}
         response.update(success)

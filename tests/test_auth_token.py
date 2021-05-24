@@ -1,40 +1,45 @@
+import json
 import unittest
 
-from app.main.db import get_db
-from app.main.jwt_util import encode_auth_token, decode_auth_token
-from app.main.models import User
-
 from base import BaseTestCase
+from models import db
+from models.user import User
+from services.jwt_util import encode_auth_token, verify_token
 
 
 class TestAuthToken(BaseTestCase):
 
     def test_encode_auth_token(self):
-        db = get_db()
         user = User(
-            id=1,
-            username='test',
+            email='test@gmail.com',
             password='123456',
-            role="user"
         )
-        db.session.add(user)
-        db.session.commit()
         auth_token = encode_auth_token(user.id)
-        self.assertTrue(isinstance(auth_token, bytes))
+        self.assertTrue(isinstance(auth_token, str))
 
-    def test_decode_auth_token(self):
-        db = get_db()
+    def test_verify_token(self):
+        db.session.query(User).filter(User.email == "test@gmail.com").delete()
+        db.session.commit()
         user = User(
-            id=1,
-            username='test',
-            password='123456',
-            role="user"
+            email='test@gmail.com',
+            password='123456'
         )
         db.session.add(user)
         db.session.commit()
-        auth_token = encode_auth_token(user.id)
-        self.assertTrue(isinstance(auth_token, bytes))
-        self.assertTrue(decode_auth_token(auth_token) == 1)
+        with self.client:
+            response = self.client.post(
+                '/auth/login',
+                data=json.dumps(dict(
+                    email='test@gmail.com',
+                    password='123456'
+                )),
+                content_type='application/json'
+            )
+        data = json.loads(response.data.decode())
+        auth_token = data['token']
+        user_id = verify_token(auth_token)
+        self.assertTrue(user_id, str)
+        self.assertTrue(user_id == user.id)
 
 
 if __name__ == '__main__':

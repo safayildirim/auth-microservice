@@ -1,7 +1,7 @@
 from flask_restful import Resource
 
 from models.user import User
-from register_resource import base_parser
+from .register_resource import base_parser
 from services import jwt_util
 
 login_parser = base_parser.copy()
@@ -24,7 +24,7 @@ class LoginResource(Resource):
                 if auth_token:
                     response = {
                         "status": "200",
-                        'token': auth_token.decode('UTF-8')
+                        'token': auth_token
                     }
                     return response, 200
             else:

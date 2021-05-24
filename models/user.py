@@ -30,10 +30,7 @@ class User(db.Model):
         self.lastname = lastname
 
     def check_password(self, password):
-        if self.password == self._hash_password(password):
-            return True
-        else:
-            return False
+        return bcrypt.checkpw(password.encode('utf-8'), self.password)
 
     def _hash_password(self, password: str):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
