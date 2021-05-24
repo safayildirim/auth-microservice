@@ -1,6 +1,7 @@
-from flask_restful import Resource, reqparse
+from common import BaseResource
+from common.exception import HttpException
+from flask_restful import reqparse
 
-from common import errors
 from models.user import User
 
 success = {"code": "0", "message": "OK"}
@@ -10,8 +11,7 @@ base_parser.add_argument('username', type=str)
 base_parser.add_argument('email', type=str, required=True)
 base_parser.add_argument('password', type=str, required=True)
 
-
-class RegisterResource(Resource):
+class RegisterResource(BaseResource):
     def __init__(self) -> None:
         super().__init__()
         self.register_parser = base_parser.copy()
@@ -22,7 +22,8 @@ class RegisterResource(Resource):
         args = self.register_parser.parse_args()
         user = User.query.filter_by(email=args.email).first()
         if user:
-            return errors['UserAlreadyExistError']
+            raise HttpException(code='003', message='User already defined', http_status=401)
+
         user = User(email=args['email'], password=args['password'],
                     username=args['username'], firstname=args['firstname'], lastname=args['lastname'])
         user.save()
