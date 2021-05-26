@@ -1,11 +1,8 @@
-from flask_restful import Resource
-
-from common.exception import HttpException
-from common import BaseResource
-
+from common import BaseResource, success
+from common.exception import WrongCredentialsError, UserNotFoundError
 from models.user import User
 from services import jwt_util
-from .register_resource import base_parser
+from resources.register_resource import base_parser
 
 login_parser = base_parser.copy()
 login_parser.remove_argument('username')
@@ -16,14 +13,13 @@ class LoginResource(BaseResource):
         args = login_parser.parse_args()
         user = User.query.filter_by(email=args.email).first()
         if user is None:
-            return HttpException(code="003", message="User not found", http_status=404)
+            raise UserNotFoundError()
         if user.check_password(args.password):
             auth_token = jwt_util.encode_auth_token(user.id)
             if auth_token:
                 response = {
-                    'status': '200',
                     'token': auth_token
                 }
-                return response
+                return response.update(success)
         else:
-            return HttpException(code="005", message="Wrong credentials error", http_status=400)
+            raise WrongCredentialsError()

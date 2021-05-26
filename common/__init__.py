@@ -1,13 +1,16 @@
 import logging
+
 from flask import request
 from flask_restful import Resource
-from werkzeug.wrappers import Response as ResponseBase
 from flask_restful.utils import unpack, OrderedDict
+from werkzeug.wrappers import Response as ResponseBase
 
 try:
     from collections.abc import Mapping
 except ImportError:
     from collections import Mapping
+
+success = {"code": "0", "message": "OK"}
 
 
 class BaseResource(Resource):
@@ -16,7 +19,7 @@ class BaseResource(Resource):
 
     def dispatch_request(self, *args, **kwargs):
         # Taken from flask
-        #noinspection PyUnresolvedReferences
+        # noinspection PyUnresolvedReferences
         logging.info('Request method %s', request.method.lower())
 
         meth = getattr(self, request.method.lower(), None)
@@ -42,7 +45,7 @@ class BaseResource(Resource):
 
         representations = self.representations or OrderedDict()
 
-        #noinspection PyUnresolvedReferences
+        # noinspection PyUnresolvedReferences
         mediatype = request.accept_mimetypes.best_match(representations, default=None)
         if mediatype in representations:
             data, code, headers = unpack(resp)

@@ -3,6 +3,7 @@ from common.api import BaseApi
 from resources.login_resource import LoginResource
 from resources.register_resource import RegisterResource
 
+
 def init_resources(app):
     auth_api = BaseApi(app, prefix="/auth")
 

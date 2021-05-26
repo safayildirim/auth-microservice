@@ -1,13 +1,8 @@
 from flask.wrappers import Response
 
+from common.exception import WrongCredentialsError
 from models.user import User
 from services import make_response
-
-
-class WrongCredentialsError(RuntimeError):
-    def __init__(self):
-        self.err_code = 401
-        self.err_message = "Wrong credentials error."
 
 
 class LoginService:

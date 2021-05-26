@@ -38,4 +38,3 @@ def verify_token(auth_token):
         raise Exception('Signature expired. Please log in again.')
     except jwt.InvalidTokenError:
         raise Exception('Invalid token. Please log in again.')
-

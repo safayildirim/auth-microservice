@@ -1,15 +1,15 @@
-from common import BaseResource
-from common.exception import HttpException
 from flask_restful import reqparse
 
+from common import BaseResource, success
+from common.exception import UserAlreadyExistError
+from common.validation import RegisterRequestDTO
 from models.user import User
-
-success = {"code": "0", "message": "OK"}
 
 base_parser = reqparse.RequestParser()
 base_parser.add_argument('username', type=str)
 base_parser.add_argument('email', type=str, required=True)
 base_parser.add_argument('password', type=str, required=True)
+
 
 class RegisterResource(BaseResource):
     def __init__(self) -> None:
@@ -18,15 +18,16 @@ class RegisterResource(BaseResource):
         self.register_parser.add_argument('firstname', type=str)
         self.register_parser.add_argument('lastname', type=str)
 
-    def post(self):
+    @request(RegisterRequestDTO)
+    def post(self, request):
         args = self.register_parser.parse_args()
         user = User.query.filter_by(email=args.email).first()
         if user:
-            raise HttpException(code='003', message='User already defined', http_status=401)
+            raise UserAlreadyExistError()
 
         user = User(email=args['email'], password=args['password'],
                     username=args['username'], firstname=args['firstname'], lastname=args['lastname'])
         user.save()
-        response = {"status": "200", 'user_id': user.user_id}
+        response = {'user_id': user.user_id}
         response.update(success)
         return response

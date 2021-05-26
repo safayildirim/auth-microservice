@@ -1,9 +1,9 @@
 import logging
 
-from common.exception import HttpException
 from flask import jsonify
-
 from flask_restful import Api
+
+from common.exception import HttpException
 
 
 class BaseApi(Api):

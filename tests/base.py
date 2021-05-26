@@ -1,3 +1,5 @@
+import json
+
 from flask import current_app
 from flask_testing import TestCase
 
@@ -21,3 +23,20 @@ class BaseTestCase(TestCase):
 
     def tearDown(self):
         self.app_context.pop()
+
+    def dummy_register(self, email="test@gmail.com", password="test"):
+        with self.client:
+            response = self.client.post(
+                '/auth/register',
+                data=json.dumps(dict(
+                    email=email,
+                    password=password
+                )),
+                content_type='application/json'
+            )
+            return response
+
+    def create_dummy_user(self, email="test@gmail.com", password="test"):
+        user = User(email=email, password=password)
+        db.session.add(user)
+        db.session.commit()
