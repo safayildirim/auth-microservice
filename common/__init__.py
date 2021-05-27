@@ -1,3 +1,4 @@
+from common.validation import RegisterRequestDTO, apply
 import logging
 
 from flask import request
@@ -37,6 +38,14 @@ class BaseResource(Resource):
             meth = decorator(meth)
         logging.info('after running decorators')
 
+        # TODO: take this dynamically
+        d = RegisterRequestDTO()
+        json_req = request.get_json()
+        for key, value in json_req.items():
+            apply(d, key, value)
+
+        kwargs['request'] = d
+
         resp = meth(*args, **kwargs)
         logging.info("response: %s", resp)
 
@@ -46,7 +55,8 @@ class BaseResource(Resource):
         representations = self.representations or OrderedDict()
 
         # noinspection PyUnresolvedReferences
-        mediatype = request.accept_mimetypes.best_match(representations, default=None)
+        mediatype = request.accept_mimetypes.best_match(
+            representations, default=None)
         if mediatype in representations:
             data, code, headers = unpack(resp)
             resp = representations[mediatype](data, code, headers)

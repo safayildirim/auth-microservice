@@ -2,7 +2,6 @@ from flask_restful import reqparse
 
 from common import BaseResource, success
 from common.exception import UserAlreadyExistError
-from common.validation import RegisterRequestDTO
 from models.user import User
 
 base_parser = reqparse.RequestParser()
@@ -18,9 +17,10 @@ class RegisterResource(BaseResource):
         self.register_parser.add_argument('firstname', type=str)
         self.register_parser.add_argument('lastname', type=str)
 
-    @request(RegisterRequestDTO)
+    # @req(RegisterRequestDTO)
     def post(self, request):
         args = self.register_parser.parse_args()
+        print(request)
         user = User.query.filter_by(email=args.email).first()
         if user:
             raise UserAlreadyExistError()
