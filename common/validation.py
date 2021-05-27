@@ -1,4 +1,5 @@
 from typing import Any, Callable, Mapping
+from flask import request
 
 
 def str_is_none(is_none, val: str):
@@ -6,21 +7,25 @@ def str_is_none(is_none, val: str):
         return val is None
     return val is not None
 
+
 def min_len(min_len, val):
     print("length: %d, value: %s" % (min_len, val))
     # return {"code": 0, "message": "min length error"}
     return None
+
 
 def max_len(max_len, val):
     print("length: %d, value: %s" % (max_len, val))
     # return {"code": 0, "message": "max length error"}
     return None
 
+
 _constraint_container: Mapping[str, Callable[[Any], None or Exception]] = {
     'str-is-none': str_is_none,
     'min_len': min_len,
     'max_len': max_len,
 }
+
 
 class Validator:
     def __init__(self, _type, parameters: Mapping[str, Any]) -> None:
@@ -36,7 +41,7 @@ class Validator:
                 validator = _constraint_container[key]
                 validation_response = validator(constraint_value, field_value)
                 self.general_validation_report.append(validation_response)
-    
+
     def is_valid(self):
         if not self.is_report_ready:
             raise Exception("report is not ready yet, first run validate")
@@ -62,7 +67,7 @@ class Validator:
             self.raise_error_stack()
 
         return value
-        
+
 
 class Field:
     @classmethod
@@ -91,8 +96,8 @@ class Field:
 
 
 class RegisterRequestDTO:
-    email = Field.String(is_blank= False, is_email= True)
-    password = Field.String(is_blank= False, min_len= 8, max_len=16)
+    email = Field.String(is_blank=False, is_email=True)
+    password = Field.String(is_blank=False, min_len=8, max_len=16)
     username = Field.String(min_len=2, max_len=25)
     obj = Field.Custom("custom", email="valid", cool=True)
 
@@ -100,34 +105,54 @@ class RegisterRequestDTO:
         return "{\n\temail: %s, \n\tusername: %s, \n\tpassword: %s, \n\tobj: %s\n}" % (self.email, self.username, self.password, self.obj)
 
 
-def request(dataType):
-    def decorator(fun):
-        d = dataType()
-        print(d)
-        print(getattr(d, 'email'))
-        print(getattr(d, 'email'))
-        setattr(d, 'username', 'zeevac')
-        print(getattr(d, 'username'))
-        print(d.username)
+def apply(obj: Any, field_name: str, field_value: Any):
 
-        def wrapper(*args, **kwargs):
-            kwargs['request'] = d
-            return fun(*args, **kwargs)
+    attr = None
+    try:
+        attr = obj.__getattribute__(field_name)
+    except Exception as ex:
+        print("unexpected value captured, err: ", ex)
+        return 
 
-        return wrapper
+    if not isinstance(attr, Validator):
+        print(
+            "current field is not defined as a validator, so processing this field is risky")
+        return
 
-    return decorator
+    try:
+        # returns the new value or raise exception
+        value = attr.apply(field_value)
+        obj.__setattr__(field_name, value)
+    except Exception as ex:
+        print("error occurred at validation process, err: ", ex)
 
 
+# def req(dataType):
+#     def decorator(fun):
+#         d = dataType()
+#         json_req = request.get_json()
+
+#         for key, value in json_req.items():
+#             apply(d, key, value)
+
+#         def wrapper(*args, **kwargs):
+#             kwargs['request'] = d
+#             return fun(*args, **kwargs)
+
+#         return wrapper
+
+#     return decorator
+
+# r= RegisterRequestDTO()
 # @request(RegisterRequestDTO)
 # def sum(request):
 #     print('string request: ', request)
 
 # print(sum())
 
-r = RegisterRequestDTO()
-# print(r.__dict__)
-# print(r.__dir__())
+# r = RegisterRequestDTO()
+# # print(r.__dict__)
+# # print(r.__dir__())
 
-r.__setattr__('username', r.__getattribute__('username').apply('yuko'))
-print(r)
+# r.__setattr__('username', r.__getattribute__('username').apply('yuko'))
+# print(r)
