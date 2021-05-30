@@ -1,4 +1,4 @@
-from common.validation import RegisterRequestDTO, apply
+from common.validation import apply
 import logging
 
 from flask import request
@@ -17,6 +17,7 @@ success = {"code": "0", "message": "OK"}
 class BaseResource(Resource):
     representations = None
     method_decorators = []
+    request_models = {}
 
     def dispatch_request(self, *args, **kwargs):
         # Taken from flask
@@ -38,13 +39,17 @@ class BaseResource(Resource):
             meth = decorator(meth)
         logging.info('after running decorators')
 
-        # TODO: take this dynamically
-        d = RegisterRequestDTO()
-        json_req = request.get_json()
-        for key, value in json_req.items():
-            apply(d, key, value)
+        logging.info("meth: %s", meth)
+        logging.info(self.request_models)
+        method_type = request.method.lower()
+        if method_type in self.request_models:
+            logging.info("request model processing")
+            d = self.request_models[method_type]()  # initialize request model
+            json_req = request.get_json()
+            for key, value in json_req.items():
+                apply(d, key, value)
 
-        kwargs['request'] = d
+            kwargs['request'] = d
 
         resp = meth(*args, **kwargs)
         logging.info("response: %s", resp)
