@@ -95,19 +95,6 @@ class Field:
         return Validator('custom', self.__get_clean_params(locals()))
 
 
-class RegisterRequestDTO:
-    email = Field.String(is_blank=False, is_email=True)
-    password = Field.String(is_blank=False, min_len=8, max_len=16)
-    username = Field.String(min_len=2, max_len=25)
-    firstname = Field.String()
-    lastname = Field.String()
-    # obj = Field.Custom("custom", email="valid", cool=True)
-
-
-    def __str__(self) -> str:
-        return "{\n\temail: %s, \n\tusername: %s, \n\tpassword: %s, \n\tfirstname: %s\n\tlastname: %s\n}" % (self.email, self.username, self.password, self.firstname, self.lastname)
-
-
 def apply(obj: Any, field_name: str, field_value: Any):
 
     attr = None
@@ -115,7 +102,7 @@ def apply(obj: Any, field_name: str, field_value: Any):
         attr = obj.__getattribute__(field_name)
     except Exception as ex:
         print("unexpected value captured, err: ", ex)
-        return 
+        return
 
     if not isinstance(attr, Validator):
         print(
