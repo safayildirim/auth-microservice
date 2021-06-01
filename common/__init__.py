@@ -14,9 +14,13 @@ class BaseResource(Resource):
         object_type = self.request_models[method]
         obj = object_type()  # initialize the object
 
+        all_attrs = obj.__dir__()
+        attrs = [attr for attr in all_attrs if not attr.__contains__("_")]
+
         json = request.get_json()
-        for key, value in json.items():
-            apply(obj, key, value)
+        for attr in attrs:
+            request_value = json.get(attr)
+            apply(obj, attr, request_value)
 
         return obj
 
