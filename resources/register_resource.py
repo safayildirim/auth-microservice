@@ -5,8 +5,8 @@ from models.user import User
 
 
 class RegisterRequestDTO:
-    email = Field.String(is_blank=False, is_email=True)
-    password = Field.String(is_blank=False, min_len=8, max_len=16)
+    email = Field.String(not_blank=True, is_email=True)
+    password = Field.String(not_blank=False, min_len=8, max_len=16)
     username = Field.String(min_len=2, max_len=25)
     firstname = Field.String()
     lastname = Field.String()

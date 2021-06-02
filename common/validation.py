@@ -1,29 +1,46 @@
+import re
 from typing import Any, Callable, Mapping
-from flask import request
 
 
-def str_is_none(is_none, val: str):
-    if is_none:
-        return val is None
-    return val is not None
+def str_not_none(not_none, val: str):
+    if not_none and val is None:
+        raise ValueError("string is none")
 
+def str_not_empty(not_empty, val: str):
+    if not_empty and (val is None or len(val) == 0):
+        raise ValueError("string is empty")
 
-def str_min_len(min_len, val):
-    print("min_len: %d, val: %s" % (min_len, val))
+def str_not_blank(not_blank, val: str):   
+    if not_blank and (val is None or len(val.strip()) == 0):
+        raise ValueError("string is blank")
+
+def str_is_email(is_email, val: str):
+    email_pattern = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
+    regexp = re.compile(email_pattern)
+    if is_email and not regexp.search(val):
+        raise ValueError("string is not an email, str: %s" % val)
+
+def str_pattern(pattern, val: str):
+    regexp = re.compile(pattern)
+    if pattern and not regexp.search(val):
+        raise ValueError("string pattern does not match, str: %s" % val)
+
+def str_min_len(min_len, val: str):
     if len(val) < min_len:
-        raise ValueError()
-    return None
+        raise ValueError("string length is smaller than min length, str: %s" % val)
 
 
-def str_max_len(max_len, val):
-    print("max_len: %d, val: %s" % (max_len, val))
+def str_max_len(max_len, val: str):
     if len(val) > max_len:
-        return ValueError()
-    return None
+        return ValueError("string length is bigger than max length, str: %s" % val)
 
 
 _constraint_container: Mapping[str, Callable[[Any], None or Exception]] = {
-    'str-is-none': str_is_none,
+    'str-not_none': str_not_none,
+    'str-not_blank': str_not_blank,
+    'str-not_empty': str_not_empty,
+    'str-is_email': str_is_email,
+    'str-pattern': str_pattern,
     'str-min_len': str_min_len,
     'str-max_len': str_max_len,
 }
@@ -78,7 +95,7 @@ class Field:
         return {key: val for key, val in params.items() if val is not None and key != 'self'}
 
     @classmethod
-    def String(self, is_none=None, is_blank=None, is_empty=None, is_email=None, pattern=None, min_len=None, max_len=None):
+    def String(self, not_none=None, not_blank=None, not_empty=None, is_email=None, pattern=None, min_len=None, max_len=None):
         return Validator('str', self.__get_clean_params(locals()))
 
     @classmethod
