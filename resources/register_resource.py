@@ -1,8 +1,18 @@
-from common.validation import RegisterRequestDTO
-
 from common import BaseResource, success
+from common.validation import Field
 from common.exception import UserAlreadyExistError
 from models.user import User
+
+
+class RegisterRequestDTO:
+    email = Field.String(not_blank=True, is_email=True)
+    password = Field.String(not_blank=False, min_len=8, max_len=16)
+    username = Field.String(min_len=2, max_len=25)
+    firstname = Field.String()
+    lastname = Field.String()
+
+    def __str__(self) -> str:
+        return "{\n\temail: %s, \n\tusername: %s, \n\tpassword: %s, \n\tfirstname: %s\n\tlastname: %s\n}" % (self.email, self.username, self.password, self.firstname, self.lastname)
 
 
 class RegisterResource(BaseResource):

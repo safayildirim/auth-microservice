@@ -1,29 +1,48 @@
+import re
 from typing import Any, Callable, Mapping
-from flask import request
 
 
-def str_is_none(is_none, val: str):
-    if is_none:
-        return val is None
-    return val is not None
+def str_not_none(not_none, val: str):
+    if not_none and val is None:
+        raise ValueError("string is none")
+
+def str_not_empty(not_empty, val: str):
+    if not_empty and (val is None or len(val) == 0):
+        raise ValueError("string is empty")
+
+def str_not_blank(not_blank, val: str):   
+    if not_blank and (val is None or len(val.strip()) == 0):
+        raise ValueError("string is blank")
+
+def str_is_email(is_email, val: str):
+    email_pattern = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
+    regexp = re.compile(email_pattern)
+    if is_email and not regexp.search(val):
+        raise ValueError("string is not an email, str: %s" % val)
+
+def str_pattern(pattern, val: str):
+    regexp = re.compile(pattern)
+    if pattern and not regexp.search(val):
+        raise ValueError("string pattern does not match, str: %s" % val)
+
+def str_min_len(min_len, val: str):
+    if len(val) < min_len:
+        raise ValueError("string length is smaller than min length, str: %s" % val)
 
 
-def min_len(min_len, val):
-    print("length: %d, value: %s" % (min_len, val))
-    # return {"code": 0, "message": "min length error"}
-    return None
-
-
-def max_len(max_len, val):
-    print("length: %d, value: %s" % (max_len, val))
-    # return {"code": 0, "message": "max length error"}
-    return None
+def str_max_len(max_len, val: str):
+    if len(val) > max_len:
+        return ValueError("string length is bigger than max length, str: %s" % val)
 
 
 _constraint_container: Mapping[str, Callable[[Any], None or Exception]] = {
-    'str-is-none': str_is_none,
-    'min_len': min_len,
-    'max_len': max_len,
+    'str-not_none': str_not_none,
+    'str-not_blank': str_not_blank,
+    'str-not_empty': str_not_empty,
+    'str-is_email': str_is_email,
+    'str-pattern': str_pattern,
+    'str-min_len': str_min_len,
+    'str-max_len': str_max_len,
 }
 
 
@@ -37,8 +56,9 @@ class Validator:
     def validate(self, field_value: Any):
         self.is_report_ready = True
         for key, constraint_value in self.parameters.items():
-            if key in _constraint_container:
-                validator = _constraint_container[key]
+            constraint = '%s-%s' % (self.type, key)
+            if constraint in _constraint_container:
+                validator = _constraint_container[constraint]
                 validation_response = validator(constraint_value, field_value)
                 self.general_validation_report.append(validation_response)
 
@@ -75,7 +95,7 @@ class Field:
         return {key: val for key, val in params.items() if val is not None and key != 'self'}
 
     @classmethod
-    def String(self, is_none=None, is_blank=None, is_empty=None, is_email=None, pattern=None, min_len=None, max_len=None):
+    def String(self, not_none=None, not_blank=None, not_empty=None, is_email=None, pattern=None, min_len=None, max_len=None):
         return Validator('str', self.__get_clean_params(locals()))
 
     @classmethod
@@ -95,19 +115,6 @@ class Field:
         return Validator('custom', self.__get_clean_params(locals()))
 
 
-class RegisterRequestDTO:
-    email = Field.String(is_blank=False, is_email=True)
-    password = Field.String(is_blank=False, min_len=8, max_len=16)
-    username = Field.String(min_len=2, max_len=25)
-    firstname = Field.String()
-    lastname = Field.String()
-    # obj = Field.Custom("custom", email="valid", cool=True)
-
-
-    def __str__(self) -> str:
-        return "{\n\temail: %s, \n\tusername: %s, \n\tpassword: %s, \n\tfirstname: %s\n\tlastname: %s\n}" % (self.email, self.username, self.password, self.firstname, self.lastname)
-
-
 def apply(obj: Any, field_name: str, field_value: Any):
 
     attr = None
@@ -115,47 +122,18 @@ def apply(obj: Any, field_name: str, field_value: Any):
         attr = obj.__getattribute__(field_name)
     except Exception as ex:
         print("unexpected value captured, err: ", ex)
-        return 
+        return
 
     if not isinstance(attr, Validator):
         print(
             "current field is not defined as a validator, so processing this field is risky")
         return
 
+    # Raise meaningful http exception, here is the failing scenario of the validation
     try:
         # returns the new value or raise exception
         value = attr.apply(field_value)
         obj.__setattr__(field_name, value)
     except Exception as ex:
         print("error occurred at validation process, err: ", ex)
-
-
-# def req(dataType):
-#     def decorator(fun):
-#         d = dataType()
-#         json_req = request.get_json()
-
-#         for key, value in json_req.items():
-#             apply(d, key, value)
-
-#         def wrapper(*args, **kwargs):
-#             kwargs['request'] = d
-#             return fun(*args, **kwargs)
-
-#         return wrapper
-
-#     return decorator
-
-# r= RegisterRequestDTO()
-# @request(RegisterRequestDTO)
-# def sum(request):
-#     print('string request: ', request)
-
-# print(sum())
-
-# r = RegisterRequestDTO()
-# # print(r.__dict__)
-# # print(r.__dir__())
-
-# r.__setattr__('username', r.__getattribute__('username').apply('yuko'))
-# print(r)
+        raise ValueError()
