@@ -22,3 +22,8 @@ class UserNotFoundError(HttpException):
 class UserAlreadyExistError(HttpException):
     def __init__(self) -> None:
         super().__init__("113", "User already exist.", 400)
+
+
+class InvalidTokenError(HttpException):
+    def __init__(self) -> None:
+        super().__init__("114", "Token is invalid.", 400)

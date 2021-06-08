@@ -35,6 +35,10 @@ class User(db.Model):
     def _hash_password(self, password: str):
         return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
+    def change_password(self, new_password):
+        self.password = self._hash_password(new_password)
+        db.session.commit()
+
     def save(self):
         self.create_time = datetime.now()
         self.last_modified_time = datetime.now()
