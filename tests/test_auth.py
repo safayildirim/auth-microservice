@@ -2,8 +2,6 @@ import json
 import unittest
 
 from app import app
-from models import db
-from models.user import User
 from tests.base import BaseTestCase
 
 
@@ -89,6 +87,22 @@ class TestAuthBlueprint(BaseTestCase):
             self.assertTrue(data['message'] == 'User is not found.')
             self.assertTrue(response.content_type == 'application/json')
             self.assertEqual(response.status_code, 404)
+
+    def test_reset_password_email_sent(self):
+        with self.client:
+            self.create_dummy_user()
+            response = self.client.post(
+                '/auth/reset-password',
+                data=json.dumps(dict(
+                    email='test@gmail.com',
+                )),
+                content_type='application/json'
+            )
+            data = json.loads(response.data.decode())
+            self.assertTrue(data['code'] == '0')
+            self.assertTrue(data['message'] == 'OK')
+            self.assertTrue(response.content_type == 'application/json')
+            self.assertEqual(response.status_code, 200)
 
 
 if __name__ == '__main__':

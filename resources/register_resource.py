@@ -1,6 +1,6 @@
 from common import BaseResource, success
-from common.validation import Field
 from common.exception import UserAlreadyExistError
+from common.validation import Field
 from models.user import User
 
 
@@ -12,7 +12,8 @@ class RegisterRequestDTO:
     lastname = Field.String()
 
     def __str__(self) -> str:
-        return "{\n\temail: %s, \n\tusername: %s, \n\tpassword: %s, \n\tfirstname: %s\n\tlastname: %s\n}" % (self.email, self.username, self.password, self.firstname, self.lastname)
+        return "{\n\temail: %s, \n\tusername: %s, \n\tpassword: %s, \n\tfirstname: %s\n\tlastname: %s\n}" % (
+        self.email, self.username, self.password, self.firstname, self.lastname)
 
 
 class RegisterResource(BaseResource):

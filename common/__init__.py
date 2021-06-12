@@ -1,8 +1,7 @@
-from common.validation import apply
-import logging
-
 from flask import request
 from flask_restful import Resource
+
+from common.validation import apply
 
 success = {"code": "0", "message": "OK"}
 

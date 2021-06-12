@@ -1,11 +1,12 @@
 from flask_restful import reqparse
+
 from common import BaseResource, success
 from common.exception import WrongCredentialsError, UserNotFoundError
 from models.user import User
 from services import jwt_util
 
 login_parser = reqparse.RequestParser()
-login_parser.remove_argument('username')
+login_parser.add_argument('email')
 
 
 class LoginResource(BaseResource):

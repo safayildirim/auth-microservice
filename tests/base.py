@@ -5,6 +5,7 @@ from flask_testing import TestCase
 
 from app import create_app
 from models import db
+from models.password_reset import PasswordReset
 from models.user import User
 
 
@@ -19,6 +20,7 @@ class BaseTestCase(TestCase):
         self.app_context = self.app.app_context()
         self.app_context.push()
         db.session.query(User).filter(User.email == "test@gmail.com").delete()
+        db.session.query(PasswordReset).filter(PasswordReset.email == "test@gmail.com").delete()
         db.session.commit()
 
     def tearDown(self):
